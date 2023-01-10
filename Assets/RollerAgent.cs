@@ -10,6 +10,7 @@ public class RollerAgent : Agent
 {
     Rigidbody rBody; // RollerAgentのRigidBody
     public Target target_obj;
+    private float old_distanceToTarget;
 
     // 初期化時に呼ばれる
     public override void Initialize()
@@ -32,7 +33,10 @@ public class RollerAgent : Agent
 
         // Targetの位置・角速度のリセット
         target_obj.setRandomPosition();
-        target_obj.setRandomOmega();
+        // target_obj.setRandomOmega();
+
+        old_distanceToTarget = Vector3.Distance(
+            this.transform.localPosition, target_obj.transform.position);
     }
 
     // 状態取得時に呼ばれる
@@ -58,6 +62,14 @@ public class RollerAgent : Agent
         // RollerAgentがTargetの位置にたどりついた時
         float distanceToTarget = Vector3.Distance(
             this.transform.localPosition, target_obj.transform.position);
+        // AddReward(-distanceToTarget * (float)0.01);
+
+        // 近づいたサブリワード
+        if (distanceToTarget < old_distanceToTarget) {
+            AddReward(0.02f);
+        }
+        old_distanceToTarget = distanceToTarget;
+
         if (distanceToTarget < 1.42f)
         {
             AddReward(1.0f);
@@ -67,10 +79,10 @@ public class RollerAgent : Agent
         // RollerAgentが床から落下した時
         if (this.transform.localPosition.y < 0)
         {
-            AddReward(-5.0f);
+            AddReward(-1.0f);
             EndEpisode();
         }
-        AddReward(-0.01f);
+        // AddReward(-0.01f);
     }
 
     // ヒューリスティックモードの行動決定時に呼ばれる

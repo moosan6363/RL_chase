@@ -31,7 +31,7 @@ public class Target : MonoBehaviour
     }
 
     public void setRandomOmega() {
-        this.omega = (Random.value - (float)0.5) * 720;
+        this.omega = (Random.value - (float)0.5) * 180;
     }
 
     public void setRandomPosition() {
