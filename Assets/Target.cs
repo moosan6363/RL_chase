@@ -31,14 +31,14 @@ public class Target : MonoBehaviour
     }
 
     public void setRandomOmega() {
-        this.omega = (Random.value - (float)0.5) * 720;
+        this.omega = (Random.value - (float)0.5) * 360;
     }
 
     public void setRandomPosition() {
         transform.position = new Vector3(
-            Random.value * 8 - 4, 
+            3 * ((Random.value + 1) * (float)2), 
             transform.position.y, 
-            Random.value * 8 - 4
+            3 * ((Random.value + 1) * (float)2)
         );
     }
 }
