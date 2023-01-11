@@ -10,6 +10,8 @@ public class RollerAgent : Agent
 {
     Rigidbody rBody; // RollerAgentのRigidBody
     public Target target_obj;
+    private float old_distanceToTarget;
+    Vector3 old_targetPos;
 
     // 初期化時に呼ばれる
     public override void Initialize()
@@ -33,6 +35,10 @@ public class RollerAgent : Agent
         // Targetの位置・角速度のリセット
         target_obj.setRandomPosition();
         target_obj.setRandomOmega();
+
+        old_distanceToTarget = Vector3.Distance(
+            this.transform.localPosition, target_obj.transform.position);
+        this.old_targetPos = target_obj.transform.position;
     }
 
     // 状態取得時に呼ばれる
@@ -40,10 +46,13 @@ public class RollerAgent : Agent
     {
         sensor.AddObservation(target_obj.transform.position.x); //TargetのX座標
         sensor.AddObservation(target_obj.transform.position.z); //TargetのZ座標
+        sensor.AddObservation(old_targetPos.x); //過去のTargetのX座標
+        sensor.AddObservation(old_targetPos.z); //過去のTargetのZ座標
         sensor.AddObservation(this.transform.localPosition.x); //RollerAgentのX座標
         sensor.AddObservation(this.transform.localPosition.z); //RollerAgentのZ座標
         sensor.AddObservation(rBody.velocity.x); // RollerAgentのX速度
         sensor.AddObservation(rBody.velocity.z); // RollerAgentのZ速度
+        old_targetPos = target_obj.transform.position;
     }
 
     // 行動実行時に呼ばれる
@@ -58,19 +67,26 @@ public class RollerAgent : Agent
         // RollerAgentがTargetの位置にたどりついた時
         float distanceToTarget = Vector3.Distance(
             this.transform.localPosition, target_obj.transform.position);
+        // AddReward(-distanceToTarget * (float)0.01);
+
+        // 遠ざかったサブリワード
+        if (distanceToTarget > old_distanceToTarget) {
+            AddReward(-0.01f);
+        }
+        old_distanceToTarget = distanceToTarget;
+
         if (distanceToTarget < 1.42f)
         {
-            AddReward(1.0f);
+            AddReward(2.0f);
             EndEpisode();
         }
 
         // RollerAgentが床から落下した時
         if (this.transform.localPosition.y < 0)
         {
-            AddReward(-5.0f);
+            AddReward(-1.0f);
             EndEpisode();
         }
-        AddReward(-0.01f);
     }
 
     // ヒューリスティックモードの行動決定時に呼ばれる
