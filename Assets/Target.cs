@@ -14,7 +14,7 @@ public class Target : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        transform.position = Rotate_Yaxis(transform.position, omega * Time.deltaTime);
+        transform.localPosition = Rotate_Yaxis(transform.localPosition, omega * Time.deltaTime);
     }
 
     Vector3 Rotate_Yaxis(Vector3 from, float angle) {
@@ -31,14 +31,14 @@ public class Target : MonoBehaviour
     }
 
     public void setRandomOmega() {
-        this.omega = (Random.value - (float)0.5) * 180;
+        this.omega = Random.Range(-180f, 180f);
     }
 
     public void setRandomPosition() {
-        transform.position = new Vector3(
-            Random.value * 8 - 4, 
-            transform.position.y, 
-            Random.value * 8 - 4
+        transform.localPosition = new Vector3(
+            Random.Range(-3.5f, 3.5f), 
+            transform.localPosition.y, 
+            Random.Range(-3.5f, 3.5f)
         );
     }
 }

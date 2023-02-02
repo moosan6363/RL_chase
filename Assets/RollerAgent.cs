@@ -37,15 +37,15 @@ public class RollerAgent : Agent
         target_obj.setRandomOmega();
 
         old_distanceToTarget = Vector3.Distance(
-            this.transform.localPosition, target_obj.transform.position);
-        this.old_targetPos = target_obj.transform.position;
+            this.transform.localPosition, target_obj.transform.localPosition);
+        this.old_targetPos = target_obj.transform.localPosition;
     }
 
     // 状態取得時に呼ばれる
     public override void CollectObservations(VectorSensor sensor)
     {
-        sensor.AddObservation(target_obj.transform.position.x); //TargetのX座標
-        sensor.AddObservation(target_obj.transform.position.z); //TargetのZ座標
+        sensor.AddObservation(target_obj.transform.localPosition.x); //TargetのX座標
+        sensor.AddObservation(target_obj.transform.localPosition.z); //TargetのZ座標
         sensor.AddObservation(old_targetPos.x); //過去のTargetのX座標
         sensor.AddObservation(old_targetPos.z); //過去のTargetのZ座標
         sensor.AddObservation(this.transform.localPosition.x); //RollerAgentのX座標
@@ -62,12 +62,11 @@ public class RollerAgent : Agent
         Vector3 controlSignal = Vector3.zero;
         controlSignal.x = actionBuffers.ContinuousActions[0];
         controlSignal.z = actionBuffers.ContinuousActions[1];
-        rBody.AddForce(controlSignal * 10);
+        Vector3 force = Vector3.ClampMagnitude(controlSignal, 1.0f) * 15f;
+        rBody.AddForce(force);
 
-        // RollerAgentがTargetの位置にたどりついた時
         float distanceToTarget = Vector3.Distance(
-            this.transform.localPosition, target_obj.transform.position);
-        // AddReward(-distanceToTarget * (float)0.01);
+            this.transform.localPosition, target_obj.transform.localPosition);
 
         // 遠ざかったサブリワード
         if (distanceToTarget > old_distanceToTarget) {
@@ -75,16 +74,17 @@ public class RollerAgent : Agent
         }
         old_distanceToTarget = distanceToTarget;
 
+        // RollerAgentがTargetの位置にたどりついた時
         if (distanceToTarget < 1.42f)
         {
-            AddReward(2.0f);
+            AddReward(1.0f);
             EndEpisode();
         }
 
         // RollerAgentが床から落下した時
         if (this.transform.localPosition.y < 0)
         {
-            AddReward(-1.0f);
+            AddReward(-0.5f);
             EndEpisode();
         }
     }
